@@ -420,60 +420,100 @@ function closeOv(){
 
 function dlPDF(){
   const no=document.getElementById('invNo').value||'invoice';
+  const fn=g('fromName')||'Cool Breeze';
+  const fd=g('fromDetail');
+  const tn=g('toName');
+  const td=g('toDetail');
+  const invNo=g('invNo')||'';
+  const dt=g('invDate');
+  const tx=parseFloat(document.getElementById('tax').value)||0;
+  const nt=g('notes');
 
-  // hidden A4 clone — fixed 794px so mobile PDF is always correct
-  const wrap=document.createElement('div');
-  wrap.style.cssText='position:fixed;left:-9999px;top:0;width:794px;background:#fff;font-family:Inter,sans-serif;z-index:-1;';
-  // inject same styles into shadow so PDF renders correctly
-  wrap.innerHTML=`<style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body,div{font-family:Inter,sans-serif}
-    .inv-inner{padding:36px 44px 44px}
-    .inv-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
-    .inv-co-name{font-size:18px;font-weight:700;color:#1a5f8a}
-    .inv-co-detail{font-size:11px;color:#555;margin-top:3px;line-height:1.55}
-    .inv-label-box{text-align:right}
-    .inv-label-box h2{font-size:22px;font-weight:700;color:#222;letter-spacing:1px}
-    .inv-no,.inv-dt{font-size:11px;color:#777;margin-top:2px}
-    .inv-hr{border:none;border-top:2px solid #1a5f8a;margin-bottom:16px}
-    .inv-parties{display:flex;gap:0;margin-bottom:20px}
-    .inv-party{flex:1}
-    .inv-party+.inv-party{border-left:1px solid #e0e0e0;padding-left:20px}
-    .inv-party-lbl{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#999;margin-bottom:4px}
-    .inv-party-name{font-size:12.5px;font-weight:600;color:#111}
-    .inv-party-det{font-size:11px;color:#666;line-height:1.5;margin-top:1px}
-    .inv-tbl{width:100%;border-collapse:collapse;margin-bottom:14px}
-    .inv-tbl thead tr{background:#1a5f8a}
-    .inv-tbl th{padding:8px 10px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;text-align:left;border-right:1px solid rgba(255,255,255,.15)}
-    .inv-tbl th:last-child{text-align:right;border-right:none}
-    .inv-tbl td{padding:9px 10px;font-size:12.5px;border-bottom:1px solid #eee;border-right:1px solid #eee}
-    .inv-tbl td:last-child{text-align:right;font-weight:600;border-right:none}
-    .inv-tbl tbody tr:nth-child(even){background:#f8fbfd}
-    .inv-tbl tbody tr:last-child td{border-bottom:none}
-    .inv-tbl .empty td{text-align:center;color:#ccc;font-style:italic;padding:18px;border:none}
-    .num-col{color:#aaa;font-size:11px;width:30px}
-    .inv-totals{display:flex;justify-content:flex-end}
-    .totals-box{width:200px;border-top:1px solid #ddd}
-    .t-row{display:flex;justify-content:space-between;font-size:12px;color:#666;padding:5px 0;border-bottom:1px solid #f0f0f0}
-    .t-row.grand{border-top:2px solid #1a5f8a;border-bottom:none;margin-top:2px;padding-top:8px;font-size:14px;font-weight:700;color:#111}
-    .t-row.grand .gval{color:#1a5f8a}
-    .inv-notes{margin-top:20px;font-size:11px;color:#777;line-height:1.6;border-top:1px solid #eee;padding-top:12px}
-    .inv-notes b{color:#444;display:block;margin-bottom:2px}
-  </style>${buildHTML()}`;
-  document.body.appendChild(wrap);
+  let sub=0, rows='';
+  if(!items.length){
+    rows='<tr><td colspan="3" style="text-align:center;color:#ccc;font-style:italic;padding:18px;">No items</td></tr>';
+  } else {
+    items.forEach((it,i)=>{
+      const a=parseFloat(it.amount)||0; sub+=a;
+      const bg=i%2===1?'background:#f8fbfd;':'';
+      rows+=`<tr style="${bg}">
+        <td style="padding:9px 10px;font-size:12px;color:#aaa;border-bottom:1px solid #eee;border-right:1px solid #eee;width:30px;">${i+1}</td>
+        <td style="padding:9px 10px;font-size:12.5px;border-bottom:1px solid #eee;border-right:1px solid #eee;">${esc(it.desc)||'—'}</td>
+        <td style="padding:9px 10px;font-size:12.5px;font-weight:600;text-align:right;border-bottom:1px solid #eee;">${fmt(a)}</td>
+      </tr>`;
+    });
+  }
 
-  setTimeout(()=>{
-    html2pdf().set({
-      margin:[10,10,10,10],
-      filename:`${no}.pdf`,
-      image:{type:'jpeg',quality:.98},
-      html2canvas:{
-        scale:2, useCORS:true, backgroundColor:'#fff',
-        width:794, windowWidth:794
-      },
-      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-    }).from(wrap).save().then(()=>document.body.removeChild(wrap));
-  },400);
+  const taxAmt=sub*tx/100;
+  const total=sub+taxAmt;
+  const taxRow=tx>0?`<div style="display:flex;justify-content:space-between;font-size:12px;color:#666;padding:5px 0;border-bottom:1px solid #f0f0f0;"><span>Tax (${tx}%)</span><span>Rs ${fmt(taxAmt)}</span></div>`:'';
+  const notesBlock=nt?`<div style="margin-top:20px;font-size:11px;color:#777;line-height:1.6;border-top:1px solid #eee;padding-top:12px;"><b style="color:#444;display:block;margin-bottom:2px;">Notes</b>${esc(nt)}</div>`:'';
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Arial,sans-serif;background:#fff;width:794px;}
+  </style></head><body>
+  <div style="padding:40px 50px 50px;background:#fff;">
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">
+      <div>
+        <div style="font-size:18px;font-weight:700;color:#1a5f8a;">${esc(fn)}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:24px;font-weight:700;color:#222;letter-spacing:1px;">INVOICE</div>
+        ${invNo?`<div style="font-size:11px;color:#777;margin-top:3px;">#${esc(invNo)}</div>`:''}
+        ${dt?`<div style="font-size:11px;color:#777;margin-top:1px;">${fmtDate(dt)}</div>`:''}
+      </div>
+    </div>
+
+    <div style="border-top:2px solid #1a5f8a;margin-bottom:16px;"></div>
+
+    <div style="display:flex;margin-bottom:20px;">
+      <div style="flex:1;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#999;margin-bottom:4px;">FROM</div>
+        <div style="font-size:12.5px;font-weight:600;color:#111;">${esc(fn)}</div>
+        <div style="font-size:11px;color:#666;line-height:1.5;margin-top:1px;">${fd.replace(/&/g,'&amp;').replace(/\n/g,'<br/>')}</div>
+      </div>
+      <div style="flex:1;border-left:1px solid #e0e0e0;padding-left:20px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#999;margin-bottom:4px;">BILL TO</div>
+        <div style="font-size:12.5px;font-weight:600;color:#111;">${tn?esc(tn):'—'}</div>
+        <div style="font-size:11px;color:#666;line-height:1.5;margin-top:1px;">${esc(td)}</div>
+      </div>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
+      <thead>
+        <tr style="background:#1a5f8a;">
+          <th style="padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:#fff;text-align:left;width:30px;border-right:1px solid rgba(255,255,255,.15)">#</th>
+          <th style="padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:#fff;text-align:left;border-right:1px solid rgba(255,255,255,.15)">Description</th>
+          <th style="padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:#fff;text-align:right;width:130px;">Amount (Rs)</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+
+    <div style="display:flex;justify-content:flex-end;">
+      <div style="width:210px;border-top:1px solid #ddd;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#666;padding:5px 0;border-bottom:1px solid #f0f0f0;"><span>Subtotal</span><span>Rs ${fmt(sub)}</span></div>
+        ${taxRow}
+        <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:#111;border-top:2px solid #1a5f8a;margin-top:2px;padding-top:8px;">
+          <span>Total</span><span style="color:#1a5f8a;">Rs ${fmt(total)}</span>
+        </div>
+      </div>
+    </div>
+
+    ${notesBlock}
+  </div>
+  </body></html>`;
+
+  html2pdf().set({
+    margin:0,
+    filename:`${no}.pdf`,
+    image:{type:'jpeg',quality:.98},
+    html2canvas:{scale:2, useCORS:true, backgroundColor:'#fff', logging:false},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+  }).from(html, 'string').save();
 }
 
 // init
