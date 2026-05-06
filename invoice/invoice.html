@@ -5,33 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Cool Breeze – Invoice</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'Inter', sans-serif;
-  background: #f0f0f0;
-  color: #111;
-}
-
+body { font-family: 'Inter', sans-serif; background: #f0f0f0; color: #111; }
 .app { display: flex; min-height: 100vh; }
 
-/* ── EDITOR ── */
+/* EDITOR */
 .editor {
-  width: 360px; min-width: 360px;
-  background: #fff; border-right: 1px solid #ddd;
-  height: 100vh; position: sticky; top: 0;
-  overflow-y: auto; display: flex; flex-direction: column;
+  width: 360px; min-width: 360px; background: #fff;
+  border-right: 1px solid #ddd; height: 100vh;
+  position: sticky; top: 0; overflow-y: auto;
+  display: flex; flex-direction: column;
 }
-
-.editor-top {
-  background: #1a5f8a; padding: 14px 18px;
-  display: flex; align-items: center; gap: 8px;
-}
+.editor-top { background: #1a5f8a; padding: 14px 18px; }
 .editor-top h1 { color: #fff; font-size: 15px; font-weight: 700; }
 .editor-top p  { color: rgba(255,255,255,.55); font-size: 10.5px; margin-top: 1px; }
-
 .editor-body { padding: 16px 18px; flex: 1; display: flex; flex-direction: column; gap: 18px; }
 
 .sec-title {
@@ -39,16 +28,13 @@ body {
   text-transform: uppercase; color: #1a5f8a;
   border-bottom: 1px solid #e0e0e0; padding-bottom: 5px; margin-bottom: 10px;
 }
-
 .field { margin-bottom: 9px; }
 .field:last-child { margin-bottom: 0; }
 label { display: block; font-size: 10.5px; font-weight: 600; color: #777; margin-bottom: 3px; }
-
 input, textarea {
   font-family: 'Inter', sans-serif; font-size: 12.5px; color: #111;
   border: 1px solid #ddd; border-radius: 5px; padding: 7px 10px;
-  background: #fafafa; width: 100%; outline: none;
-  transition: border-color .15s;
+  background: #fafafa; width: 100%; outline: none; transition: border-color .15s;
 }
 input:focus, textarea:focus { border-color: #1a8fc1; background: #fff; }
 textarea { resize: vertical; min-height: 46px; }
@@ -63,16 +49,12 @@ textarea { resize: vertical; min-height: 46px; }
 .del:hover { color: #e05c5c; }
 .add-btn {
   margin-top: 6px; width: 100%; padding: 7px;
-  background: #f0f7fc; border: 1px dashed #1a8fc1;
-  border-radius: 5px; color: #1a8fc1;
-  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;
+  background: #f0f7fc; border: 1px dashed #1a8fc1; border-radius: 5px;
+  color: #1a8fc1; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer;
 }
 .add-btn:hover { background: #ddeefa; }
 
-.editor-foot {
-  padding: 12px 18px 18px; border-top: 1px solid #e8e8e8;
-  display: flex; flex-direction: column; gap: 7px;
-}
+.editor-foot { padding: 12px 18px 18px; border-top: 1px solid #e8e8e8; display: flex; flex-direction: column; gap: 7px; }
 .btn {
   width: 100%; padding: 9px; border: none; border-radius: 6px;
   font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600;
@@ -84,98 +66,53 @@ textarea { resize: vertical; min-height: 46px; }
 .btn-outline:hover { background: #ddeefa; }
 .mob-only { display: none; }
 
-/* ── PREVIEW PANEL ── */
-.preview-wrap {
-  flex: 1; padding: 28px 36px; overflow-y: auto;
-  display: flex; flex-direction: column; align-items: center;
-}
-.preview-label {
-  font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; color: #aaa;
-  align-self: flex-start; margin-bottom: 14px;
-}
+/* PREVIEW */
+.preview-wrap { flex: 1; padding: 28px 36px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+.preview-label { font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #aaa; align-self: flex-start; margin-bottom: 14px; }
 
-/* ── INVOICE DOCUMENT (Word-style) ── */
-#inv {
-  width: 100%; max-width: 680px;
-  background: #fff;
-  box-shadow: 0 1px 12px rgba(0,0,0,.12);
-}
-
-/* invoice inner — always auto height, never min-height */
+/* INVOICE */
+#inv { width: 100%; max-width: 680px; background: #fff; box-shadow: 0 1px 12px rgba(0,0,0,.12); }
 .inv-inner { padding: 36px 44px 44px; }
-
-/* top: company left, INVOICE right */
-.inv-top {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  margin-bottom: 20px;
-}
-.inv-co-name  { font-size: 18px; font-weight: 700; color: #1a5f8a; }
-.inv-co-detail{ font-size: 11px; color: #555; margin-top: 3px; line-height: 1.55; }
-
+.inv-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.inv-co-name { font-size: 18px; font-weight: 700; color: #1a5f8a; }
 .inv-label-box { text-align: right; }
 .inv-label-box h2 { font-size: 22px; font-weight: 700; color: #222; letter-spacing: 1px; }
 .inv-label-box .inv-no { font-size: 11px; color: #777; margin-top: 3px; }
 .inv-label-box .inv-dt { font-size: 11px; color: #777; margin-top: 1px; }
-
-/* divider */
 .inv-hr { border: none; border-top: 2px solid #1a5f8a; margin-bottom: 16px; }
-
-/* from / to row */
-.inv-parties {
-  display: flex; gap: 0; margin-bottom: 20px;
-}
+.inv-parties { display: flex; gap: 0; margin-bottom: 20px; }
 .inv-party { flex: 1; }
 .inv-party + .inv-party { border-left: 1px solid #e0e0e0; padding-left: 20px; }
 .inv-party-lbl  { font-size: 9px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #999; margin-bottom: 4px; }
 .inv-party-name { font-size: 12.5px; font-weight: 600; color: #111; }
 .inv-party-det  { font-size: 11px; color: #666; line-height: 1.5; margin-top: 1px; }
-
-/* table */
 .inv-tbl { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
 .inv-tbl thead tr { background: #1a5f8a; }
-.inv-tbl th {
-  padding: 8px 10px; font-size: 10px; font-weight: 700;
-  letter-spacing: 1px; text-transform: uppercase; color: #fff;
-  text-align: left; border-right: 1px solid rgba(255,255,255,.15);
-}
+.inv-tbl th { padding: 8px 10px; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fff; text-align: left; border-right: 1px solid rgba(255,255,255,.15); }
 .inv-tbl th:last-child { text-align: right; border-right: none; }
-.inv-tbl td {
-  padding: 9px 10px; font-size: 12.5px;
-  border-bottom: 1px solid #eee; border-right: 1px solid #eee;
-}
+.inv-tbl td { padding: 9px 10px; font-size: 12.5px; border-bottom: 1px solid #eee; border-right: 1px solid #eee; }
 .inv-tbl td:last-child { text-align: right; font-weight: 600; border-right: none; }
 .inv-tbl tbody tr:nth-child(even) { background: #f8fbfd; }
 .inv-tbl tbody tr:last-child td { border-bottom: none; }
 .inv-tbl .empty td { text-align: center; color: #ccc; font-style: italic; padding: 18px; border: none; }
 .num-col { color: #aaa; font-size: 11px; width: 30px; }
-
-/* totals */
-.inv-totals { display: flex; justify-content: flex-end; margin-bottom: 0; }
+.inv-totals { display: flex; justify-content: flex-end; }
 .totals-box { width: 200px; border-top: 1px solid #ddd; }
 .t-row { display: flex; justify-content: space-between; font-size: 12px; color: #666; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
 .t-row.grand { border-top: 2px solid #1a5f8a; border-bottom: none; margin-top: 2px; padding-top: 8px; font-size: 14px; font-weight: 700; color: #111; }
 .t-row.grand .gval { color: #1a5f8a; }
-
 .inv-notes { margin-top: 20px; font-size: 11px; color: #777; line-height: 1.6; border-top: 1px solid #eee; padding-top: 12px; }
 .inv-notes b { color: #444; display: block; margin-bottom: 2px; }
 
-/* ── MOBILE OVERLAY ── */
-.overlay {
-  display: none; position: fixed; inset: 0; z-index: 999;
-  background: rgba(0,0,0,.5); overflow-y: auto; padding: 12px 8px 40px;
-}
+/* OVERLAY */
+.overlay { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,.5); overflow-y: auto; padding: 12px 8px 40px; }
 .overlay.on { display: block; }
 .ov-bar { display: flex; gap: 8px; margin-bottom: 10px; }
-.ov-bar button {
-  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
-  border: none; border-radius: 20px; padding: 7px 14px; cursor: pointer;
-}
+.ov-bar button { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; border: none; border-radius: 20px; padding: 7px 14px; cursor: pointer; }
 .ov-close { background: #fff; color: #222; }
-.ov-dl    { background: #1a5f8a; color: #fff; margin-left: auto; }
-#inv-mob  { background: #fff; }
+.ov-dl { background: #1a5f8a; color: #fff; margin-left: auto; }
+#inv-mob { background: #fff; }
 
-/* ── RESPONSIVE ── */
 @media (max-width: 700px) {
   .app { flex-direction: column; }
   .editor { width: 100%; min-width: unset; height: auto; position: static; }
@@ -185,7 +122,6 @@ textarea { resize: vertical; min-height: 46px; }
   .editor-foot .btn { flex: 1; }
   .mob-only { width: 100%; order: -1; flex: none; }
 }
-
 @media print {
   .editor, .preview-label { display: none !important; }
   .preview-wrap { padding: 0; }
@@ -206,75 +142,40 @@ textarea { resize: vertical; min-height: 46px; }
 <div class="app">
   <aside class="editor">
     <div class="editor-top">
-      <div>
-        <h1>❄ Cool Breeze</h1>
-        <p>Invoice Builder</p>
-      </div>
+      <h1>❄ Cool Breeze</h1>
+      <p>Invoice Builder</p>
     </div>
-
     <div class="editor-body">
-
       <div>
         <div class="sec-title">Your Info</div>
-        <div class="field">
-          <label>Business Name</label>
-          <input id="fromName" value="Cool Breeze" oninput="render()">
-        </div>
-        <div class="field">
-          <label>Name / Phone</label>
-          <textarea id="fromDetail" oninput="render()">Waseem Abbas
-03047473355</textarea>
-        </div>
+        <div class="field"><label>Business Name</label><input id="fromName" value="Cool Breeze" oninput="render()"></div>
+        <div class="field"><label>Name / Phone</label><textarea id="fromDetail" oninput="render()">Waseem Abbas
+03047473355</textarea></div>
       </div>
-
       <div>
         <div class="sec-title">Bill To</div>
-        <div class="field">
-          <label>Client Name</label>
-          <input id="toName" placeholder="Client name" oninput="render()">
-        </div>
-        <div class="field">
-          <label>Address / Phone</label>
-          <textarea id="toDetail" placeholder="optional" oninput="render()"></textarea>
-        </div>
+        <div class="field"><label>Client Name</label><input id="toName" placeholder="Client name" oninput="render()"></div>
+        <div class="field"><label>Address / Phone</label><textarea id="toDetail" placeholder="optional" oninput="render()"></textarea></div>
       </div>
-
       <div>
         <div class="sec-title">Invoice Details</div>
         <div class="row2">
-          <div class="field">
-            <label>Invoice #</label>
-            <input id="invNo" placeholder="INV-001" oninput="render()">
-          </div>
-          <div class="field">
-            <label>Date</label>
-            <input id="invDate" type="date" oninput="render()">
-          </div>
+          <div class="field"><label>Invoice #</label><input id="invNo" placeholder="INV-001" oninput="render()"></div>
+          <div class="field"><label>Date</label><input id="invDate" type="date" oninput="render()"></div>
         </div>
-        <div class="field">
-          <label>Tax %</label>
-          <input id="tax" type="number" value="0" min="0" max="100" oninput="render()">
-        </div>
+        <div class="field"><label>Tax %</label><input id="tax" type="number" value="0" min="0" max="100" oninput="render()"></div>
       </div>
-
       <div>
         <div class="sec-title">Items</div>
-        <div class="item-hdr">
-          <span>Description</span><span>Amount (Rs)</span><span></span>
-        </div>
+        <div class="item-hdr"><span>Description</span><span>Amount (Rs)</span><span></span></div>
         <div class="items-list" id="itemsList"></div>
         <button class="add-btn" onclick="addItem()">+ Add Item</button>
       </div>
-
       <div>
         <div class="sec-title">Notes</div>
-        <div class="field">
-          <textarea id="notes" placeholder="e.g. Payment due within 7 days" oninput="render()"></textarea>
-        </div>
+        <div class="field"><textarea id="notes" placeholder="e.g. Payment due within 7 days" oninput="render()"></textarea></div>
       </div>
-
     </div>
-
     <div class="editor-foot">
       <button class="btn mob-only btn-outline" onclick="openOv()">👁 Preview</button>
       <button class="btn btn-primary" onclick="dlPDF()">⬇ Download PDF</button>
@@ -292,14 +193,10 @@ textarea { resize: vertical; min-height: 46px; }
 let items=[], nid=1;
 
 function g(id){ return document.getElementById(id).value.trim(); }
-function esc(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
 function ea(s){ return String(s).replace(/"/g,'&quot;'); }
 function fmt(n){ return n.toLocaleString('en-PK',{minimumFractionDigits:0,maximumFractionDigits:0}); }
-function fmtDate(d){
-  return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-}
+function fmtDate(d){ return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}); }
 
 function buildHTML(){
   const fn=g('fromName')||'Cool Breeze';
@@ -310,40 +207,28 @@ function buildHTML(){
   const dt=g('invDate');
   const tx=parseFloat(document.getElementById('tax').value)||0;
   const nt=g('notes');
-
   let sub=0, rows='';
   if(!items.length){
     rows='<tr class="empty"><td colspan="3">No items added yet</td></tr>';
   } else {
     items.forEach((it,i)=>{
       const a=parseFloat(it.amount)||0; sub+=a;
-      rows+=`<tr>
-        <td class="num-col">${i+1}</td>
-        <td>${esc(it.desc)||'—'}</td>
-        <td>${fmt(a)}</td>
-      </tr>`;
+      rows+=`<tr><td class="num-col">${i+1}</td><td>${esc(it.desc)||'—'}</td><td>${fmt(a)}</td></tr>`;
     });
   }
-
-  const taxAmt=sub*tx/100;
-  const total=sub+taxAmt;
+  const taxAmt=sub*tx/100, total=sub+taxAmt;
   const taxRow=tx>0?`<div class="t-row"><span>Tax (${tx}%)</span><span>Rs ${fmt(taxAmt)}</span></div>`:'';
   const notesBlock=nt?`<div class="inv-notes"><b>Notes</b>${esc(nt)}</div>`:'';
-
   return `<div class="inv-inner">
     <div class="inv-top">
-      <div>
-        <div class="inv-co-name">${esc(fn)}</div>
-      </div>
+      <div class="inv-co-name">${esc(fn)}</div>
       <div class="inv-label-box">
         <h2>INVOICE</h2>
         ${no?`<div class="inv-no">#${esc(no)}</div>`:''}
         ${dt?`<div class="inv-dt">${fmtDate(dt)}</div>`:''}
       </div>
     </div>
-
     <hr class="inv-hr"/>
-
     <div class="inv-parties">
       <div class="inv-party">
         <div class="inv-party-lbl">From</div>
@@ -356,7 +241,6 @@ function buildHTML(){
         <div class="inv-party-det">${esc(td)}</div>
       </div>
     </div>
-
     <table class="inv-tbl">
       <thead><tr>
         <th style="width:30px">#</th>
@@ -365,29 +249,22 @@ function buildHTML(){
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
-
-    <div class="inv-totals">
-      <div class="totals-box">
-        <div class="t-row"><span>Subtotal</span><span>Rs ${fmt(sub)}</span></div>
-        ${taxRow}
-        <div class="t-row grand"><span>Total</span><span class="gval">Rs ${fmt(total)}</span></div>
-      </div>
-    </div>
-
+    <div class="inv-totals"><div class="totals-box">
+      <div class="t-row"><span>Subtotal</span><span>Rs ${fmt(sub)}</span></div>
+      ${taxRow}
+      <div class="t-row grand"><span>Total</span><span class="gval">Rs ${fmt(total)}</span></div>
+    </div></div>
     ${notesBlock}
   </div>`;
 }
 
-function render(){
-  document.getElementById('inv').innerHTML=buildHTML();
-}
+function render(){ document.getElementById('inv').innerHTML=buildHTML(); }
 
 function renderForm(){
   const c=document.getElementById('itemsList'); c.innerHTML='';
   items.forEach(it=>{
     const r=document.createElement('div'); r.className='item-row';
-    r.innerHTML=`
-      <input value="${ea(it.desc)}" placeholder="Description" oninput="upd(${it.id},'desc',this.value)">
+    r.innerHTML=`<input value="${ea(it.desc)}" placeholder="Description" oninput="upd(${it.id},'desc',this.value)">
       <input type="number" value="${it.amount}" placeholder="0" min="0" oninput="upd(${it.id},'amount',this.value)">
       <button class="del" onclick="del(${it.id})">×</button>`;
     c.appendChild(r);
@@ -395,14 +272,9 @@ function renderForm(){
 }
 
 function addItem(){
-  const id=nid++;
-  items.push({id,desc:'',amount:''});
+  const id=nid++; items.push({id,desc:'',amount:''});
   renderForm();
-  setTimeout(()=>{
-    const rows=document.querySelectorAll('#itemsList .item-row');
-    const last=rows[rows.length-1];
-    if(last) last.querySelector('input').focus();
-  },50);
+  setTimeout(()=>{ const rows=document.querySelectorAll('#itemsList .item-row'); const last=rows[rows.length-1]; if(last) last.querySelector('input').focus(); },50);
   render();
 }
 function del(id){ items=items.filter(i=>i.id!==id); renderForm(); render(); }
@@ -413,107 +285,215 @@ function openOv(){
   document.getElementById('overlay').classList.add('on');
   document.body.style.overflow='hidden';
 }
-function closeOv(){
-  document.getElementById('overlay').classList.remove('on');
-  document.body.style.overflow='';
-}
+function closeOv(){ document.getElementById('overlay').classList.remove('on'); document.body.style.overflow=''; }
 
+// ── PDF using jsPDF directly (works on all devices) ──
 function dlPDF(){
-  const no=document.getElementById('invNo').value||'invoice';
-  const fn=g('fromName')||'Cool Breeze';
-  const fd=g('fromDetail');
-  const tn=g('toName');
-  const td=g('toDetail');
-  const invNo=g('invNo')||'';
-  const dt=g('invDate');
-  const tx=parseFloat(document.getElementById('tax').value)||0;
-  const nt=g('notes');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4', orientation:'portrait' });
 
-  let sub=0, rows='';
+  const fn  = g('fromName') || 'Cool Breeze';
+  const fd  = g('fromDetail');
+  const tn  = g('toName');
+  const td  = g('toDetail');
+  const no  = g('invNo');
+  const dt  = g('invDate');
+  const tx  = parseFloat(document.getElementById('tax').value)||0;
+  const nt  = g('notes');
+  const filename = (no||'invoice') + '.pdf';
+
+  const W   = 210; // A4 width mm
+  const mar = 18;  // margin
+  const col = W - mar*2;
+  const blue= '#1a5f8a';
+  const grey= '#666666';
+
+  let y = mar;
+
+  // helper: text safe (no undefined)
+  const T = (s) => String(s||'');
+
+  // ── HEADER ──
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(16);
+  doc.setTextColor(blue);
+  doc.text(T(fn), mar, y);
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(20);
+  doc.setTextColor('#222222');
+  doc.text('INVOICE', W-mar, y, {align:'right'});
+
+  y += 5;
+  if(no){
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(9);
+    doc.setTextColor(grey);
+    doc.text('#'+T(no), W-mar, y, {align:'right'});
+    y += 4;
+  }
+  if(dt){
+    doc.setFontSize(9);
+    doc.setTextColor(grey);
+    doc.text(fmtDate(dt), W-mar, y, {align:'right'});
+    y += 4;
+  }
+
+  y += 3;
+  // blue line
+  doc.setDrawColor(blue);
+  doc.setLineWidth(0.6);
+  doc.line(mar, y, W-mar, y);
+  y += 6;
+
+  // ── FROM / BILL TO ──
+  const col2 = col/2 - 4;
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor('#999999');
+  doc.text('FROM', mar, y);
+  doc.text('BILL TO', mar + col2 + 8, y);
+  y += 4;
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.setTextColor('#111111');
+  doc.text(T(fn), mar, y);
+  doc.text(T(tn)||'—', mar + col2 + 8, y);
+  y += 4;
+
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.setTextColor(grey);
+  const fdLines = T(fd).split('\n');
+  fdLines.forEach(line=>{ doc.text(T(line), mar, y); y+=4; });
+
+  // reset y for bill-to detail (parallel)
+  let y2 = y - (fdLines.length * 4);
+  const tdLines = T(td).split('\n');
+  tdLines.forEach(line=>{ doc.text(T(line), mar + col2 + 8, y2); y2+=4; });
+  y = Math.max(y, y2) + 4;
+
+  // ── TABLE HEADER ──
+  const descW  = col * 0.70;
+  const amtW   = col * 0.18;
+  const numW   = col * 0.08;
+  const rowH   = 8;
+
+  // header bg
+  doc.setFillColor(blue);
+  doc.rect(mar, y, col, rowH, 'F');
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(8);
+  doc.setTextColor('#ffffff');
+  doc.text('#',         mar + 2,                    y + 5.2);
+  doc.text('DESCRIPTION', mar + numW + 2,           y + 5.2);
+  doc.text('AMOUNT (Rs)', mar + numW + descW + amtW, y + 5.2, {align:'right'});
+  y += rowH;
+
+  // ── TABLE ROWS ──
+  let subtotal = 0;
   if(!items.length){
-    rows='<tr><td colspan="3" style="text-align:center;color:#ccc;font-style:italic;padding:18px;">No items</td></tr>';
+    doc.setFillColor('#ffffff');
+    doc.rect(mar, y, col, rowH, 'F');
+    doc.setFont('helvetica','italic');
+    doc.setFontSize(9);
+    doc.setTextColor('#cccccc');
+    doc.text('No items', W/2, y+5.2, {align:'center'});
+    y += rowH;
   } else {
-    items.forEach((it,i)=>{
-      const a=parseFloat(it.amount)||0; sub+=a;
-      const bg=i%2===1?'background:#f8fbfd;':'';
-      rows+=`<tr style="${bg}">
-        <td style="padding:9px 10px;font-size:12px;color:#aaa;border-bottom:1px solid #eee;border-right:1px solid #eee;width:30px;">${i+1}</td>
-        <td style="padding:9px 10px;font-size:12.5px;border-bottom:1px solid #eee;border-right:1px solid #eee;">${esc(it.desc)||'—'}</td>
-        <td style="padding:9px 10px;font-size:12.5px;font-weight:600;text-align:right;border-bottom:1px solid #eee;">${fmt(a)}</td>
-      </tr>`;
+    items.forEach((it, idx)=>{
+      const amt = parseFloat(it.amount)||0;
+      subtotal += amt;
+      // alternate row
+      if(idx%2===1){ doc.setFillColor('#f8fbfd'); doc.rect(mar, y, col, rowH, 'F'); }
+      else          { doc.setFillColor('#ffffff'); doc.rect(mar, y, col, rowH, 'F'); }
+
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(grey);
+      doc.text(String(idx+1), mar+2, y+5.2);
+
+      doc.setTextColor('#111111');
+      const desc = T(it.desc)||'—';
+      // truncate if too long
+      const maxDescW = descW - 4;
+      let dispDesc = desc;
+      while(doc.getTextWidth(dispDesc) > maxDescW && dispDesc.length > 1) dispDesc = dispDesc.slice(0,-1);
+      if(dispDesc !== desc) dispDesc += '…';
+      doc.text(dispDesc, mar+numW+2, y+5.2);
+
+      doc.setFont('helvetica','bold');
+      doc.setTextColor('#1a5f8a');
+      doc.text(fmt(amt), mar+numW+descW+amtW, y+5.2, {align:'right'});
+
+      // bottom border
+      doc.setDrawColor('#eeeeee');
+      doc.setLineWidth(0.2);
+      doc.line(mar, y+rowH, mar+col, y+rowH);
+      y += rowH;
     });
   }
 
-  const taxAmt=sub*tx/100;
-  const total=sub+taxAmt;
-  const taxRow=tx>0?`<div style="display:flex;justify-content:space-between;font-size:12px;color:#666;padding:5px 0;border-bottom:1px solid #f0f0f0;"><span>Tax (${tx}%)</span><span>Rs ${fmt(taxAmt)}</span></div>`:'';
-  const notesBlock=nt?`<div style="margin-top:20px;font-size:11px;color:#777;line-height:1.6;border-top:1px solid #eee;padding-top:12px;"><b style="color:#444;display:block;margin-bottom:2px;">Notes</b>${esc(nt)}</div>`:'';
+  y += 4;
 
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:Arial,sans-serif;background:#fff;width:794px;}
-  </style></head><body>
-  <div style="padding:40px 50px 50px;background:#fff;">
+  // ── TOTALS ──
+  const taxAmt = subtotal * tx / 100;
+  const total  = subtotal + taxAmt;
+  const totX   = mar + col - 60;
+  const totW   = 60;
 
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">
-      <div>
-        <div style="font-size:18px;font-weight:700;color:#1a5f8a;">${esc(fn)}</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:24px;font-weight:700;color:#222;letter-spacing:1px;">INVOICE</div>
-        ${invNo?`<div style="font-size:11px;color:#777;margin-top:3px;">#${esc(invNo)}</div>`:''}
-        ${dt?`<div style="font-size:11px;color:#777;margin-top:1px;">${fmtDate(dt)}</div>`:''}
-      </div>
-    </div>
+  doc.setDrawColor('#dddddd');
+  doc.setLineWidth(0.3);
+  doc.line(totX, y, totX+totW, y);
+  y += 5;
 
-    <div style="border-top:2px solid #1a5f8a;margin-bottom:16px;"></div>
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9.5);
+  doc.setTextColor(grey);
+  doc.text('Subtotal', totX, y);
+  doc.text('Rs '+fmt(subtotal), totX+totW, y, {align:'right'});
+  y += 6;
 
-    <div style="display:flex;margin-bottom:20px;">
-      <div style="flex:1;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#999;margin-bottom:4px;">FROM</div>
-        <div style="font-size:12.5px;font-weight:600;color:#111;">${esc(fn)}</div>
-        <div style="font-size:11px;color:#666;line-height:1.5;margin-top:1px;">${fd.replace(/&/g,'&amp;').replace(/\n/g,'<br/>')}</div>
-      </div>
-      <div style="flex:1;border-left:1px solid #e0e0e0;padding-left:20px;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#999;margin-bottom:4px;">BILL TO</div>
-        <div style="font-size:12.5px;font-weight:600;color:#111;">${tn?esc(tn):'—'}</div>
-        <div style="font-size:11px;color:#666;line-height:1.5;margin-top:1px;">${esc(td)}</div>
-      </div>
-    </div>
+  if(tx > 0){
+    doc.text(`Tax (${tx}%)`, totX, y);
+    doc.text('Rs '+fmt(taxAmt), totX+totW, y, {align:'right'});
+    y += 6;
+  }
 
-    <table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
-      <thead>
-        <tr style="background:#1a5f8a;">
-          <th style="padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:#fff;text-align:left;width:30px;border-right:1px solid rgba(255,255,255,.15)">#</th>
-          <th style="padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:#fff;text-align:left;border-right:1px solid rgba(255,255,255,.15)">Description</th>
-          <th style="padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:#fff;text-align:right;width:130px;">Amount (Rs)</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
+  doc.setDrawColor(blue);
+  doc.setLineWidth(0.5);
+  doc.line(totX, y, totX+totW, y);
+  y += 5;
 
-    <div style="display:flex;justify-content:flex-end;">
-      <div style="width:210px;border-top:1px solid #ddd;">
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:#666;padding:5px 0;border-bottom:1px solid #f0f0f0;"><span>Subtotal</span><span>Rs ${fmt(sub)}</span></div>
-        ${taxRow}
-        <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:#111;border-top:2px solid #1a5f8a;margin-top:2px;padding-top:8px;">
-          <span>Total</span><span style="color:#1a5f8a;">Rs ${fmt(total)}</span>
-        </div>
-      </div>
-    </div>
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
+  doc.setTextColor('#111111');
+  doc.text('Total', totX, y);
+  doc.setTextColor(blue);
+  doc.text('Rs '+fmt(total), totX+totW, y, {align:'right'});
+  y += 8;
 
-    ${notesBlock}
-  </div>
-  </body></html>`;
+  // ── NOTES ──
+  if(nt){
+    doc.setDrawColor('#eeeeee');
+    doc.setLineWidth(0.3);
+    doc.line(mar, y, mar+col, y);
+    y += 5;
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(8);
+    doc.setTextColor('#444444');
+    doc.text('NOTES', mar, y);
+    y += 4;
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(9);
+    doc.setTextColor(grey);
+    const noteLines = doc.splitTextToSize(T(nt), col);
+    noteLines.forEach(line=>{ doc.text(line, mar, y); y+=4.5; });
+  }
 
-  html2pdf().set({
-    margin:0,
-    filename:`${no}.pdf`,
-    image:{type:'jpeg',quality:.98},
-    html2canvas:{scale:2, useCORS:true, backgroundColor:'#fff', logging:false},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  }).from(html, 'string').save();
+  doc.save(filename);
 }
 
 // init
